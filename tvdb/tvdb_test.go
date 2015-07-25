@@ -1,21 +1,37 @@
 package tvdb
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestGetSeries(t *testing.T) {
-	seriesList, err := GetSeries("Ashes to ashes")
+	seriesList, err := GetSeries("Mr. Robot")
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	for _, series := range seriesList.Series {
-		if series.seriesName == "Ashes to ashes" {
+		// t.Log(series)
+		if series.SeriesName == "Mr. Robot" {
 			return
 		}
-		fmt.Println(series.seriesName)
+	}
+
+	t.Error("name received != name sent")
+}
+
+func TestGetDetails(t *testing.T) {
+	seriesList, err := GetSeries("Mr. Robot")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	for _, series := range seriesList.Series {
+		err = series.GetFullDetails()
+		if err != nil {
+			t.Error(err)
+		}
 	}
 }

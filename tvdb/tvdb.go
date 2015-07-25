@@ -10,11 +10,10 @@ import (
 )
 
 const (
-	apiKey             string = "5013770E45C5BE20"
-	baseURL            string = "http://thetvdb.com/api"
-	getSeriesURL       string = baseURL + "/GetSeries.php?seriesname=%v"
-	getSeriesByIDURL   string = baseURL + "/api/" + apiKey + "/series/%v/%v.xml"
-	getSeriesDetailURL string = baseURL + "/" + apiKey + "/series/%v/%v.xml"
+	apiKey                  string = "5013770E45C5BE20"
+	baseURL                 string = "http://thetvdb.com/api"
+	getSeriesURL            string = baseURL + "/GetSeries.php?seriesname=%v"
+	getSeriesFullDetailsURL string = baseURL + "/" + apiKey + "/series/%v/all/%v.xml"
 )
 
 type tvdbPipeList []string
@@ -27,82 +26,119 @@ func (pipe *tvdbPipeList) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (
 	}
 
 	*pipe = strings.Split(content, "|")
-
 	return
 }
 
-type tvdbShowList struct {
-	Series []tvdbShow `xml:"Series"`
+type Episode struct {
+	ID                uint32       `xml:"id"`
+	EpisodeName       string       `xml:"EpisodeName"`
+	Language          string       `xml:"Language"`
+	FirstAired        string       `xml:"FirstAired"`
+	EpisodeNumber     uint32       `xml:"EpisodeNumber"`
+	SeasonNumber      uint32       `xml:"SeasonNumber"`
+	Overview          string       `xml:"Overview"`
+	CombinedEpisodeNb string       `xml:"Combined_episodenumber"`
+	CombinedSeason    string       `xml:"Combined_season"`
+	DvdEpNumber       string       `xml:"DVD_episodenumber"`
+	DvdSeason         string       `xml:"DVD_season"`
+	Director          tvdbPipeList `xml:"Director"`
+	GuestStars        tvdbPipeList `xml:"GuestStars"`
+	EpImgFlag         string       `xml:"EpImgFlag"`
+	ImdbID            string       `xml:"IMDB_ID"`
+	ProductionCode    string       `xml:"ProductionCode"`
+	Rating            string       `xml:"Rating"`
+	RatingCount       string       `xml:"RatingCount"`
+	Writer            tvdbPipeList `xml:"Writer"`
+	AbsoluteNb        string       `xml:"absolute_number"`
+	AirsAfterSeason   string       `xml:"airsafter_season"`
+	AirsAfterEpisode  string       `xml:"airsafter_episode"`
+	Artwork           string       `xml:"filename"`
+	LastUpdated       string       `xml:"lastupdated"`
+	SeasonID          uint32       `xml:"seasonid"`
+	SeriesID          uint32       `xml:"seriesid"`
+	ArtworkAdded      string       `xml:"thumb_added"`
+	ArtworkHeight     string       `xml:"thumb_height"`
+	ArtworkWidth      string       `xml:"thumb_width"`
 }
 
 type tvdbShow struct {
 	ID            uint32       `xml:"id"`
-	language      string       `xml:"language"`
-	seriesName    string       `xml:"SeriesName"`
-	aliasNames    tvdbPipeList `xml:"AliasNames"`
-	status        string       `xml:"Status"`
-	banner        string       `xml:"banner"`
-	overview      string       `xml:"overview"`
-	airDate       string       `xml:"Airs_DayOfWeek"`
-	airTime       string       `xml:"Airs_Time"`
-	contentRating string       `xml:"ContentRating"`
-	rating        string       `xml:"Rating"`
-	ratingCount   uint32       `xml:"RatingCount"`
-	runtime       uint32       `xml:"Runtime"`
-	firstAired    string       `xml:"FirstAired"`
-	genre         tvdbPipeList `xml:"Genre"`
-	added         string       `xml:"added"`
-	addedBy       string       `xml:"addedBy"`
-	fanart        string       `xml:"fanart"`
-	lastUpdated   string       `xml:"lastupdated"`
-	posters       string       `xml:"posters"`
-	imdbID        string       `xml:"IMDB_ID"`
-	zap2itID      string       `xml:"zap2it_id"`
-	network       string       `xml:"Network"`
-	networkID     uint32       `xml:"NetworkID"`
+	Language      string       `xml:"language"`
+	SeriesName    string       `xml:"SeriesName"`
+	AliasNames    tvdbPipeList `xml:"AliasNames"`
+	Status        string       `xml:"Status"`
+	Banner        string       `xml:"banner"`
+	Overview      string       `xml:"Overview"`
+	Actors        tvdbPipeList `xml:"Actors"`
+	AirDate       string       `xml:"Airs_DayOfWeek"`
+	AirTime       string       `xml:"Airs_Time"`
+	ContentRating string       `xml:"ContentRating"`
+	Rating        string       `xml:"Rating"`
+	RatingCount   string       `xml:"RatingCount"`
+	Runtime       string       `xml:"Runtime"`
+	FirstAired    string       `xml:"FirstAired"`
+	Genre         tvdbPipeList `xml:"Genre"`
+	Added         string       `xml:"added"`
+	AddedBy       string       `xml:"addedBy"`
+	Fanart        string       `xml:"fanart"`
+	LastUpdated   string       `xml:"lastupdated"`
+	Poster        string       `xml:"poster"`
+	ImdbID        string       `xml:"IMDB_ID"`
+	Zap2itID      string       `xml:"zap2it_id"`
+	Network       string       `xml:"Network"`
+	NetworkID     string       `xml:"NetworkID"`
+	Seasons       map[uint32][]*Episode
 }
 
-type tvdbEpisode struct {
-	ID                uint32       `xml:"id"`
-	episodeName       string       `xml:"EpisodeName"`
-	language          string       `xml:"Language"`
-	firstAired        string       `xml:"FirstAired"`
-	episodeNumber     uint32       `xml:"EpisodeNumber"`
-	seasonNumber      uint32       `xml:"SeasonNumber"`
-	overview          string       `xml:"Overview"`
-	combinedEpisodeNb uint32       `xml:"Combined_episodenumber"`
-	combinedSeason    uint32       `xml:"Combined_season"`
-	dvdEpNumber       uint32       `xml:"DVD_episodenumber"`
-	dvdSeason         uint32       `xml:"DVD_season"`
-	director          tvdbPipeList `xml:"Director"`
-	guestStars        tvdbPipeList `xml:"GuestStars"`
-	epImgFlag         uint32       `xml:"EpImgFlag"`
-	imdbID            string       `xml:"IMDB_ID"`
-	productionCode    string       `xml:"ProductionCode"`
-	rating            string       `xml:"Rating"`
-	ratingCount       uint32       `xml:"RatingCount"`
-	writer            tvdbPipeList `xml:"Writer"`
-	absoluteNb        uint32       `xml:"absolute_number"`
-	airsAfterSeason   uint32       `xml:"airsafter_season"`
-	airsAfterEpisode  uint32       `xml:"airsafter_episode"`
-	artwork           string       `xml:"filename"`
-	lastUpdated       string       `xml:"lastupdated"`
-	seasonID          uint32       `xml:"seasonid"`
-	seriesID          uint32       `xml:"seriesid"`
-	artworkAdded      string       `xml:"thumb_added"`
-	artworkHeight     uint32       `xml:"thumb_height"`
-	artworkWidth      uint32       `xml:"thumb_width"`
+type tvdbShowList struct {
+	Series []*tvdbShow `xml:"Series"`
 }
 
-func GetSeries(name string) (seriesList tvdbShowList, err error) {
-	resp, err := http.Get(fmt.Sprintf(getSeriesURL, url.QueryEscape(name)))
+type EpisodeList struct {
+	Episodes []*Episode `xml:"Episode"`
+}
+
+func (show *tvdbShow) GetDetails() (err error) {
+	resp, err := http.Get(fmt.Sprintf(getSeriesFullDetailsURL, show.ID, "en"))
 
 	if err != nil {
 		return
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
 
+	seriesList := tvdbShowList{}
+	if err = xml.Unmarshal(data, &seriesList); err != nil {
+		return
+	}
+	*show = *seriesList.Series[0]
+
+	episodeList := EpisodeList{}
+	if err = xml.Unmarshal(data, &episodeList); err != nil {
+		return
+	}
+
+	if show.Seasons == nil {
+		show.Seasons = make(map[uint32][]*Episode)
+	}
+
+	for _, episode := range episodeList.Episodes {
+		show.Seasons[episode.SeasonNumber] = append(show.Seasons[episode.SeasonNumber], episode)
+	}
+
+	return
+}
+
+func GetSeries(name string) (seriesList tvdbShowList, err error) {
+	resp, err := http.Get(fmt.Sprintf(getSeriesURL, url.QueryEscape(name)))
+	if err != nil {
+		return
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}
