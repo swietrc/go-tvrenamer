@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/nomis43/go-tvrenamer"
+	"github.com/nomis43/go-tvrenamer/config"
 	"log"
 	"os"
 )
@@ -14,9 +15,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg := Config{"en", "{{SeriesName}} - S{{SeasonNb}}E{{EpNumber}} - {{EpName}}", "$HOME/Medialib", "^(.+)[\\.\\ ][Ss]?(\\d{2}|\\d{1})[EeXx]?(\\d{2}).*(\\.\\w{1,4})$", "", tvrenamer.TVDB}
+	cfg := config.Load("$HOME/.config/tvrenamer/tvrenamer.cfg")
 
-	cfg.Load("$HOME/.config/tvrenamer/tvrenamer.cfg")
 	tvr := tvrenamer.TvRenamer{Language: cfg.Language, NameFormatting: cfg.NameFormatting, NewPath: cfg.NewPath, Regex: cfg.Regex}
 
 	log.Println(tvr)
