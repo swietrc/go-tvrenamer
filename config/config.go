@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"code.google.com/p/gcfg"
@@ -25,6 +25,7 @@ func (c *Config) loadFromFile(path string) {
 			Language       string
 			NameFormatting string
 			NewPath        string
+			Regex          string
 		}
 	}{}
 
@@ -39,19 +40,33 @@ func (c *Config) loadFromFile(path string) {
 	if val := cfgFile.Main.NameFormatting; val != "" {
 		c.NameFormatting = val
 	}
+	if val := cfgFile.Main.NewPath; val != "" {
+		c.NewPath = val
+	}
+	if val := cfgFile.Main.Regex; val != "" {
+		c.Regex = val
+	}
 }
 
+// loadFromArgs populates Config with the args passed with the command line
 func (c *Config) loadFromArgs() {
-	argsConf := Config{}
-	flag.StringVar(&argsConf.Language, "l", c.Language, "Language")
-	flag.StringVar(&argsConf.NameFormatting, "f", c.NameFormatting, "Format of the new filename")
+	flag.StringVar(&c.Language, "l", c.Language, "Language")
+	flag.StringVar(&c.NameFormatting, "f", c.NameFormatting, "Format of the new filename")
 	flag.StringVar(&c.Regex, "r", c.Regex, "Custom regular expression to match the file information (must match 4 groups)")
 	flag.Parse()
-
 	c.Path = flag.Arg(0)
 }
 
-func (c *Config) Load(path string) {
+// Load initializes a Config object with
+func Load(path string) *Config {
+	// Default values
+	c := new(Config)
+	c.Language = "en"
+	c.NameFormatting = "{{SeriesName}} - S{{SeasonNb}}E{{EpNumber}} - {{EpName}}"
+	c.NewPath, _ = os.Getwd()
+	c.Regex = "^(.+)[\\.\\ ][Ss]?(\\d{2}|\\d{1})[EeXx]?(\\d{2}).*(\\.\\w{1,4})$"
+	c.Scraper = 0
 	c.loadFromFile(path)
 	c.loadFromArgs()
+	return c
 }
