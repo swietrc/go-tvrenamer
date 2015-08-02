@@ -12,7 +12,7 @@ import (
 const (
 	apiKey                  string = "5013770E45C5BE20"
 	baseURL                 string = "http://thetvdb.com/api"
-	getSeriesURL            string = baseURL + "/GetSeries.php?seriesname=%v"
+	getSeriesURL            string = baseURL + "/GetSeries.php?seriesname=%v&language=%v"
 	getSeriesFullDetailsURL string = baseURL + "/" + apiKey + "/series/%v/all/%v.xml"
 )
 
@@ -99,7 +99,7 @@ type EpisodeList struct {
 }
 
 func (show *tvdbShow) GetDetails() (err error) {
-	resp, err := http.Get(fmt.Sprintf(getSeriesFullDetailsURL, show.ID, "en"))
+	resp, err := http.Get(fmt.Sprintf(getSeriesFullDetailsURL, show.ID, show.Language))
 
 	if err != nil {
 		return
@@ -132,8 +132,8 @@ func (show *tvdbShow) GetDetails() (err error) {
 	return
 }
 
-func GetSeries(name string) (seriesList tvdbShowList, err error) {
-	resp, err := http.Get(fmt.Sprintf(getSeriesURL, url.QueryEscape(name)))
+func GetSeries(name string, lang string) (seriesList tvdbShowList, err error) {
+	resp, err := http.Get(fmt.Sprintf(getSeriesURL, url.QueryEscape(name), url.QueryEscape(lang)))
 	if err != nil {
 		return
 	}
