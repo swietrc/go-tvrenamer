@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetSeries(t *testing.T) {
-	seriesList, err := GetSeries("Mr. Robot")
+	seriesList, err := GetSeries("Mr. Robot", "en")
 
 	if err != nil {
 		t.Error(err)
@@ -22,14 +22,14 @@ func TestGetSeries(t *testing.T) {
 }
 
 func TestGetDetails(t *testing.T) {
-	seriesList, err := GetSeries("Mr. Robot")
+	seriesList, err := GetSeries("Mr. Robot", "en")
 
 	if err != nil {
 		t.Error(err)
 	}
 
 	for _, series := range seriesList.Series {
-		err = series.GetFullDetails()
+		err = series.GetDetails()
 		if err != nil {
 			t.Error(err)
 		}
