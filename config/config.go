@@ -14,7 +14,8 @@ type Config struct {
 	NewPath        string // Renamed file path
 	Regex          string // Regex with which to find the name, the season and the episode number from the file (default can be overriden with -r)
 	Path           string // Path of the file to rename
-	Scraper        uint8
+	// REVIEW: switch Config.Path to []string ?
+	Scraper uint8
 }
 
 // loadFromFile populates Config from a file specified by path

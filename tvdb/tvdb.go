@@ -61,7 +61,7 @@ type Episode struct {
 	ArtworkWidth      string       `xml:"thumb_width"`
 }
 
-type tvdbShow struct {
+type Series struct {
 	ID            uint32       `xml:"id"`
 	Language      string       `xml:"language"`
 	SeriesName    string       `xml:"SeriesName"`
@@ -90,15 +90,15 @@ type tvdbShow struct {
 	Seasons       map[uint32][]*Episode
 }
 
-type tvdbShowList struct {
-	Series []*tvdbShow `xml:"Series"`
+type SeriesList struct {
+	Series []*Series `xml:"Series"`
 }
 
 type EpisodeList struct {
 	Episodes []*Episode `xml:"Episode"`
 }
 
-func (show *tvdbShow) GetDetails() (err error) {
+func (show *Series) GetDetails() (err error) {
 	resp, err := http.Get(fmt.Sprintf(getSeriesFullDetailsURL, show.ID, show.Language))
 
 	if err != nil {
@@ -110,7 +110,7 @@ func (show *tvdbShow) GetDetails() (err error) {
 		return
 	}
 
-	seriesList := tvdbShowList{}
+	seriesList := SeriesList{}
 	if err = xml.Unmarshal(data, &seriesList); err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ func (show *tvdbShow) GetDetails() (err error) {
 	return
 }
 
-func GetSeries(name string, lang string) (seriesList tvdbShowList, err error) {
+func GetSeries(name string, lang string) (seriesList SeriesList, err error) {
 	resp, err := http.Get(fmt.Sprintf(getSeriesURL, url.QueryEscape(name), url.QueryEscape(lang)))
 	if err != nil {
 		return
