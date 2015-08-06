@@ -44,9 +44,15 @@ func (r *TvRenamer) Rename(filepath string) (err error) {
 		return
 	}
 	var b bytes.Buffer
+	var newFilepath string
 	r.NameFormatting.Execute(&b, episode)
 	newFilename := b.String() + path.Ext(filepath)
-	os.Rename(filepath)
+	if r.Move {
+		newFilepath = path.Join(path.Base(filepath), newFilename)
+	} else {
+		newFilepath = path.Join(r.NewPath, newFilename)
+	}
+	os.Rename(filepath, newFilepath)
 	return
 }
 
