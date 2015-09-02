@@ -126,14 +126,14 @@ func (r *TvRenamer) getEpisode(filepath string) (episode, error) {
 	match := r.Regex.FindStringSubmatch(path.Base(filepath))
 	episodeNb, _ := strconv.ParseUint(match[3], 10, 8)
 	seasonNb, _ := strconv.ParseUint(match[2], 10, 8)
+	if r.CustomName != "" {
+		match[1] = r.CustomName
+	}
+	match[1] = strings.Replace(match[1], ".", " ", -1)
 	log.Println(match)
 	switch r.Scraper {
-
 	case TVDB:
-		if r.CustomName != "" {
-			match[1] = r.CustomName
-		}
-		seriesList, err := tvdb.GetSeries(strings.Replace(match[1], ".", " ", -1), r.Language)
+		seriesList, err := tvdb.GetSeries(match[1], r.Language)
 		if len(seriesList.Series) == 0 {
 			return ep, err
 		}
@@ -141,9 +141,7 @@ func (r *TvRenamer) getEpisode(filepath string) (episode, error) {
 		tvdbSeries.GetDetails()
 		tvdbEp := seriesList.Series[0].Seasons[uint32(seasonNb)][uint32(episodeNb)-1]
 		ep = episode{
-			SeriesName: tvdbSeries.SeriesName,
-			// EpisodeNb:   fmt.Sprintf("%02d", tvdbEp.EpisodeNumber),
-			// SeasonNb:    fmt.Sprintf("%02d", tvdbEp.SeasonNumber),
+			SeriesName:  tvdbSeries.SeriesName,
 			EpisodeNb:   fmt.Sprint(tvdbEp.EpisodeNumber),
 			SeasonNb:    fmt.Sprint(tvdbEp.SeasonNumber),
 			EpisodeName: tvdbEp.EpisodeName,

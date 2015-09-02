@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/nomis43/go-tvrenamer"
 	"github.com/nomis43/go-tvrenamer/config"
-	"log"
 	"os"
 )
 
@@ -17,7 +16,7 @@ func main() {
 
 	cfg := config.Load("$HOME/.config/tvrenamer/tvrenamer.cfg")
 
-	tvr := tvrenamer.TvRenamer{Language: cfg.Language, NameFormatting: cfg.NameFormatting, NewPath: cfg.NewPath, Regex: cfg.Regex}
+	tvr := tvrenamer.New(cfg.Language, cfg.NameFormatting, cfg.NewPath, cfg.Regex, cfg.Move)
 
-	log.Println(tvr)
+	tvr.Rename(cfg.Path)
 }
