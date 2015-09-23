@@ -3,7 +3,6 @@ package tvrenamer
 import (
 	"bytes"
 	"fmt"
-	"github.com/nomis43/go-tvrenamer/tvdb"
 	"log"
 	"os"
 	"path"
@@ -11,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/nomis43/go-tvrenamer/tvdb"
 )
 
 const (
@@ -38,7 +39,7 @@ type TvRenamer struct {
 	Scraper        uint8
 }
 
-// Rename a file according to the config object passed as argument
+// Rename renames a file based on info parsed from its name.
 func (r *TvRenamer) Rename(filepath string) (err error) {
 	filepath, err = getAbsolutePath(filepath)
 	if err != nil {
