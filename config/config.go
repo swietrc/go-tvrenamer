@@ -1,10 +1,11 @@
 package config
 
 import (
-	"code.google.com/p/gcfg"
 	"flag"
 	"log"
 	"os"
+
+	"gopkg.in/gcfg.v1"
 )
 
 // Config contains the configuration of the program loaded from the command line and the config file
