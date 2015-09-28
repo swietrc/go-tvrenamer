@@ -134,11 +134,18 @@ func (r *TvRenamer) getEpisode(filepath string) (episode, error) {
 	log.Println(match)
 	switch r.Scraper {
 	case TVDB:
-		seriesList, err := tvdb.GetSeries(match[1], r.Language)
-		if len(seriesList.Series) == 0 {
-			return ep, err
+		seriesList, _ := tvdb.GetSeries(match[1], r.Language)
+
+		if seriesList.Series == nil {
+			// return ep, err
+			log.Fatalln("ERROR: EPISODE NOT FOUND!")
 		}
+		fmt.Println("BEGINNING")
+		fmt.Println(seriesList.Series[0].SeriesName)
+		fmt.Println("END")
+
 		tvdbSeries := seriesList.Series[0]
+
 		tvdbSeries.GetDetails()
 		tvdbEp := seriesList.Series[0].Seasons[uint32(seasonNb)][uint32(episodeNb)-1]
 		ep = episode{
