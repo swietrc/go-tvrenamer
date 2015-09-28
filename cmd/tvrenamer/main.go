@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/nomis43/go-tvrenamer"
 	"github.com/nomis43/go-tvrenamer/config"
-	"os"
 )
 
 func main() {
 
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: tvrenamer [OPTIONS] path")
+		fmt.Println("Usage: tvrenamer [OPTION] FILE")
 		os.Exit(1)
 	}
 
