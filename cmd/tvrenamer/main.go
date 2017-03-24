@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nomis43/go-tvrenamer"
-	"github.com/nomis43/go-tvrenamer/config"
+	"github.com/swietrc/go-tvrenamer"
+	"github.com/swietrc/go-tvrenamer/config"
 )
 
 func main() {

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/nomis43/go-tvrenamer/tvdb"
+	"github.com/swietrc/go-tvrenamer/tvdb"
 )
 
 const (
