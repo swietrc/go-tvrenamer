@@ -15,9 +15,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg := config.Load("$HOME/.config/tvrenamer/tvrenamer.cfg")
+	cfg := config.Load()
 
-	tvr := tvrenamer.New(cfg.Language, cfg.NameFormatting, cfg.NewPath, cfg.Regex, cfg.Move)
-
-	tvr.Rename(cfg.Path)
+	tvr := tvrenamer.New(cfg.Language, cfg.NameFormat, cfg.NewPath, cfg.Regex, cfg.Move)
+	tvr.Rename(cfg.Path[0])
 }

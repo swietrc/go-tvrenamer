@@ -1,76 +1,75 @@
 package config
 
 import (
-	flag "github.com/spf13/pflag"
-	"log"
+	"fmt"
+	"github.com/spf13/pflag"
 	"os"
 
-	"gopkg.in/gcfg.v1"
+	"github.com/spf13/viper"
 )
 
 // Config contains the configuration of the program loaded from the command line and the config file
 type Config struct {
-	Language       string // Language with which to rename the file(s)
-	Move           bool   // Move stores whether to move the files or not
-	NameFormatting string // Format
-	NewPath        string // Renamed file path
-	Regex          string // Regex with which to find the name, the season and the episode number from the file (default can be overriden with -r)
-	Path           string // Path of the file to rename
+	Language   string   // Language with which to rename the file(s)
+	Move       bool     // Move stores whether to move the files or not
+	NameFormat string   // Format
+	NewPath    string   // Renamed file path
+	Regex      string   // Regex with which to find the name, the season and the episode number from the file (default can be overriden with -r)
+	Path       []string // Path of the file to rename
 	// REVIEW: switch Config.Path to []string ?
 	Scraper uint8
 }
 
-// loadFromFile populates Config from a file specified by path
-func (c *Config) loadFromFile(path string) {
-	filename := os.ExpandEnv(path)
-	cfgFile := struct {
-		Main struct {
-			Language       string
-			NameFormatting string
-			NewPath        string
-			Regex          string
-		}
-	}{}
+// loadArgs parses command line args and returns non flag arguments
+func loadArgs() []string {
+	flagSet := pflag.NewFlagSet("tvrenamer flags", pflag.ExitOnError)
+	flagSet.StringP("language", "l", viper.GetString("language"), "Language")
+	flagSet.StringP("format", "f", viper.GetString("format"), "Format of the new filename")
+	flagSet.StringP("regex", "r", viper.GetString("regex"), "Custom regular expression to match the file information (must match 4 groups)")
+	flagSet.BoolP("move", "m", false, "Flag called to move the file to a location specified in the config file")
+	flagSet.Parse(os.Args[1:])
 
-	err := gcfg.ReadFileInto(&cfgFile, filename)
-	if err != nil {
-		log.Println(err)
-	}
-
-	if val := cfgFile.Main.Language; val != "" {
-		c.Language = val
-	}
-	if val := cfgFile.Main.NameFormatting; val != "" {
-		c.NameFormatting = val
-	}
-	if val := cfgFile.Main.NewPath; val != "" {
-		c.NewPath = val
-	}
-	if val := cfgFile.Main.Regex; val != "" {
-		c.Regex = val
-	}
+	viper.BindPFlags(flagSet)
+	return flagSet.Args()
 }
 
-// loadFromArgs populates Config with the args passed with the command line
-func (c *Config) loadFromArgs() {
-	flag.StringVar(&c.Language, "l", c.Language, "Language")
-	flag.StringVar(&c.NameFormatting, "f", c.NameFormatting, "Format of the new filename")
-	flag.StringVar(&c.Regex, "r", c.Regex, "Custom regular expression to match the file information (must match 4 groups)")
-	flag.BoolVar(&c.Move, "m", false, "Flag called to move the file to a location specified in the config file")
-	flag.Parse()
-	c.Path = flag.Arg(0)
+// setDefaults sets default configuration values
+func setDefaults() {
+	viper.SetDefault("format", "{{.SeriesName}} - S{{.SeasonNb}}E{{.EpisodeNb}} - {{.EpisodeName}}")
+	viper.SetDefault("language", "en")
+	// viper.SetDefault("NewPath", os.Getwd())
+	viper.SetDefault("regex", "^(.+)[\\.\\ ][Ss]?(\\d{2}|\\d{1})[EeXx]?(\\d{2}).*(\\.\\w{1,4})$")
+	viper.SetDefault("scraper", 0)
+	viper.SetDefault("new-path", "$HOME")
 }
 
 // Load initializes a Config object from command line args
-func Load(path string) *Config {
-	// Default values
+func Load() *Config {
+	// viper.Debug()
 	c := new(Config)
-	c.Language = "en"
-	c.NameFormatting = "{{.SeriesName}} - S{{.SeasonNb}}E{{.EpisodeNb}} - {{.EpisodeName}}"
-	c.NewPath, _ = os.Getwd()
-	c.Regex = "^(.+)[\\.\\ ][Ss]?(\\d{2}|\\d{1})[EeXx]?(\\d{2}).*(\\.\\w{1,4})$"
+
+	// Set default config filepaths
+	viper.SetConfigType("toml")
+	viper.SetConfigName("tvrenamer")
+	viper.AddConfigPath("/etc/tvrenamer/")
+	viper.AddConfigPath("$HOME/.tvrenamer")
+	viper.AddConfigPath("$HOME/.config/tvrenamer")
+	viper.AddConfigPath(".")
+	setDefaults()
+
+	// Parse command line args and read configuration
+	c.Path = loadArgs()
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+
+	// Load config into struct
+	c.Language = viper.GetString("language")
+	c.NameFormat = viper.GetString("format")
+	c.NewPath = viper.GetString("new-path")
+	c.Regex = viper.GetString("regex")
 	c.Scraper = 0
-	c.loadFromFile(path)
-	c.loadFromArgs()
+
 	return c
 }
