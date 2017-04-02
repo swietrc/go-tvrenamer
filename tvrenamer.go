@@ -11,8 +11,13 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/fatih/color"
 	"github.com/swietrc/go-tvrenamer/tvdb"
 )
+
+var Green = color.New(color.FgGreen).PrintfFunc()
+var Red = color.New(color.FgRed).PrintfFunc()
+var Bold = color.New(color.Bold).PrintfFunc()
 
 const (
 	// TVDB represents the tvdb API
@@ -37,6 +42,7 @@ type TvRenamer struct {
 	NewPath        *template.Template
 	Regex          *regexp.Regexp
 	Scraper        uint8
+	Confirm        bool
 }
 
 // Rename renames a file based on info parsed from its name.
@@ -60,27 +66,33 @@ func (r *TvRenamer) Rename(filepath string) (err error) {
 		EpisodeName: ep.EpisodeName,
 	})
 	newFilename := b.String() + path.Ext(filepath)
+
+	Bold("New filename -> ")
+	Green("%s\n", newFilename)
+
 	if r.Move {
 		b = bytes.Buffer{}
 
 		r.NewPath.Execute(&b, ep)
-		log.Println(b.String())
 		newFilepath = path.Join(b.String(), newFilename)
 		err = os.MkdirAll(path.Dir(newFilepath), 0777)
 		if err != nil {
 			log.Println("Unable to create dirs to path " + path.Dir(newFilepath))
 			log.Fatalln(err)
 		}
+		Bold("Your file is going to be moved to ")
+		Green("%s\n", newFilepath)
 	} else {
 		newFilepath = path.Join(path.Dir(filepath), newFilename)
 	}
-	log.Println(newFilepath)
-	log.Println(newFilename)
 
-	err = os.Rename(filepath, newFilepath)
-	if err != nil {
-		log.Println(err)
+	if !r.Confirm || (r.Confirm && confirmDialog()) {
+		err = os.Rename(filepath, newFilepath)
+		if err != nil {
+			log.Println(err)
+		}
 	}
+
 	return
 }
 
@@ -95,13 +107,14 @@ func (r *TvRenamer) SetScraper(scraper uint8) {
 }
 
 // New allocates a new TvRenamer with the given language, formatting, path and regexp
-func New(language string, nameFormatting string, newPath string, regex string, move bool) *TvRenamer {
+func New(language string, nameFormatting string, newPath string, regex string, move bool, confirm bool) *TvRenamer {
 
 	var err error
 
 	tvr := TvRenamer{
 		Language: language,
 		Move:     move,
+		Confirm:  confirm,
 	}
 
 	tvr.NameFormatting, err = template.New("Filename formatting").Parse(nameFormatting)
@@ -131,7 +144,6 @@ func (r *TvRenamer) getEpisode(filepath string) (episode, error) {
 		match[1] = r.CustomName
 	}
 	match[1] = strings.Replace(match[1], ".", " ", -1)
-	log.Println(match)
 	switch r.Scraper {
 	case TVDB:
 		seriesList, _ := tvdb.GetSeries(match[1], r.Language)
@@ -140,9 +152,6 @@ func (r *TvRenamer) getEpisode(filepath string) (episode, error) {
 			// return ep, err
 			log.Fatalln("ERROR: EPISODE NOT FOUND!")
 		}
-		fmt.Println("BEGINNING")
-		fmt.Println(seriesList.Series[0].SeriesName)
-		fmt.Println("END")
 
 		tvdbSeries := seriesList.Series[0]
 
@@ -165,4 +174,27 @@ func getAbsolutePath(p string) (absPath string, err error) {
 		absPath = path.Join(wd, p)
 	}
 	return
+}
+
+func confirmDialog() bool {
+	/*
+		bold := color.New(color.Bold).PrintfFunc()
+		green := color.New(color.FgGreen, color.Bold).PrintfFunc()
+		red := color.New(color.FgRed, color.Bold).PrintfFunc()
+	*/
+	text := ""
+	for true {
+		Bold("- Do you confirm? [")
+		Green("Y")
+		fmt.Print("/")
+		Red("N")
+		Bold("] ")
+		fmt.Scanf("%s\n", &text)
+		if text == "Y" || text == "y" {
+			return true
+		} else if text == "N" || text == "n" {
+			return false
+		}
+	}
+	return false
 }
